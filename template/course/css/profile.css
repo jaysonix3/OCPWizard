@@ -1,0 +1,53 @@
+body{
+	margin: 2%;
+}
+
+.text-center{
+	margin-top: 1%;
+}
+
+.text-center p{
+	padding: 0px;
+	margin: 0px;
+}
+
+.container{
+	margin-top: 40px;
+}
+
+th{
+	width: 30%;
+}
+
+@media print {
+  .float-right, .container .btn-lg {
+    display: none;
+  }
+}
+
+.container .btn-lg{
+	border-radius: 15px;
+	border: none;
+	margin: 10px 0;
+	padding: 5px 20px;
+	background-color: #222;
+}
+
+.float-left{
+	right: 65%;
+	width: 30%;
+}
+
+.float-right{
+	left: 65%;
+	width: 30%;
+}
+
+header .col-sm-1:first-child{
+	margin-right: -2%;
+}
+
+.btn-primary, .btn-block{
+	background-color: #720309;
+	border-color: #720309;
+}

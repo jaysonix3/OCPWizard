@@ -1,0 +1,13 @@
+.message-header{
+	margin-top: 1%;
+}
+
+.message-header strong{
+	font-size: 17px;
+}
+
+.message-header img{
+	max-width: 12%;
+	height: auto;
+	margin-bottom: 1%;
+}
