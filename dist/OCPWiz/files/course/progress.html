@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Progress</title>
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/progress.css" rel="stylesheet">
+</head>
+<body>
+	<div class="container">
+		<a class="btn btn-primary btn-lg" href="course.html">Home</a>
+		<p><strong>Name: <span id="fullname"></span></strong></p>
+		<p><u>Quiz Scores</u></p>
+		<p>This shows your scores in your latest attempt of each quiz. Note that you need to get 100% in all of the quizzes to be able to take the final exam.</p>
+		<p>You can click on the score to retry or attempt a quiz.</p>
+		<table class="table table-hover table-sm text-center">
+			<tbody>
+    		<tr>
+	      		<th class="col-sm-2">Topic</th>
+	      		<th class="col-sm-2">Score</th>
+	      		<th class="col-sm-8">Questions</th>
+		    </tr>
+      		</tbody>
+		</table>
+		<p><u>Final Exam</u></p>
+		<strong><p id="final_exam_score"></p></strong><br>
+		<a id="go_final" class="btn btn-success disabled" type="button">Attempt</a>
+	</div>
+
+	<div class="float-right fixed-top mr-5 mt-5 text-right">
+	<a id="dlpdf" class="btn btn-success btn-lg" type="button">Download PDF</a>
+	<p class="lead">In the print dialog, <br>select <strong>destination &#8594; Save as PDF</strong></p>
+	</div>
+
+	<script src="js/jquery-3.5.1.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/index.js"></script>
+	<script src="js/progress.js"></script>
+</body>
+</html>

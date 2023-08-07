@@ -1,0 +1,30 @@
+.dg-answer-button-container{
+	margin-top: 20px;
+}
+.dg-question-count{
+	font-weight: bold;
+	margin-top: 10px;
+	margin-bottom: 20px;
+}
+.quiz-header{
+	margin-top:50px;
+	margin-bottom: 10px;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+#error {
+	font-style:italic;
+	color:red;
+}
+.dg-question-option{
+	white-space: nowrap;
+}
+.dg-question-option label{
+	white-space: normal;
+	vertical-align: top;
+}
+
+.dg-question-option input{
+	margin-right: 2px;
+	margin-top: 2px;
+}
