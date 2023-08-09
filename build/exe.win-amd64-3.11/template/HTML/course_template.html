@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>CMSC 206 Interactive Offline Course</title>
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/index.css" rel="stylesheet">
+	<link href="css/course.css" rel="stylesheet">
+</head>
+<body>
+	<header>
+	<div class="no-gutters text-center">
+		<img class="img-fluid" src="img/Logo.png">
+	</div>
+	</header>
+
+	<div id="module_content" class="row overflow-hidden vw-100">
+			<div class="col-sm-2 sticky-top">
+		    	<h6><a href="profile.html">Profile</a><br>
+		    		<a href="progress.html">Progress</a><br>
+		    		<a id="resources" href="#">Resources</a></h6>
+
+
+				<ul class="list-unstyled">
+		    		<li><a href="#" data-value="0">Introduction</a></li>
+		    	</ul>
+	    	</div>
+		    <div class="col-sm-8">
+		    		<div class="mt-2" id="iframe_desc"> 
+		    			<h3><strong></strong></h3>
+		    			<p id="sub"></p>
+		    		</div>
+		    		<div class="embed-responsive embed-responsive-16by9">
+						<iframe id="currentframe" class="embed-responsive-item" src="123"></iframe>
+					</div>
+			</div>
+			<div class="col-sm-2" id="module_questions">
+				<p>Questions:</p>
+				<textarea rows="10"></textarea><br>
+				<button class="btn btn-outline-dark">Save</button>
+			</div>
+	</div>
+
+	<div id="module_quiz" class="overflow-hidden vw-100 fixed-bottom text-center">
+	</div>
+
+	<script src="js/jquery-3.5.1.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/index.js"></script>
+	<script src="js/course.js"></script>
+</body>
+</html>
