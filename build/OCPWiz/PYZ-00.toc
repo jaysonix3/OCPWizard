@@ -1,4 +1,4 @@
-('C:\\Users\\user\\OneDrive\\Documents\\OJT\\ocp\\build\\OCPWiz\\PYZ-00.pyz',
+('C:\\Users\\user\\OneDrive\\Documents\\OJT\\OCPWizard\\build\\OCPWiz\\PYZ-00.pyz',
  [('PIL',
    'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\PIL\\__init__.py',
    'PYMODULE'),

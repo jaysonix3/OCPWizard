@@ -56,12 +56,13 @@ class OCPWizApp(ctk.CTk):
         height_new=int(height/6)
         my_img = ctk.CTkImage(light_image=img,
                               size=(width_new,height_new))
-
+        
         self.sidebar_head = ctk.CTkFrame(sidebar_frame,width=165,height=120,fg_color=up_maroon)
-        self.sidebar_head.grid(row=0, column=0, columnspan=1)
+        self.sidebar_head.grid(row=0, column=0, columnspan=1, )
+        self.sidebar_head.pack_propagate(False)
 
         img_label = ctk.CTkLabel(self.sidebar_head, image=my_img, text='')
-        img_label.pack()
+        img_label.pack(pady=(30,0))
         #COURSE INFO BTN------------------------------------------------------------------------------------------------------------------------------------
         self.course_info_btn = ctk.CTkButton(sidebar_frame,text="Course Info",width=165,height=70,font=LARGEFONT,anchor="w",fg_color=up_maroon, hover_color=up_maroon_d,
                                              command=lambda: self.indicate(self.course_info_btn, CourseInfoPage,))
@@ -518,8 +519,9 @@ class OCPWizApp(ctk.CTk):
         with open(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','js/','metadata.json'), 'w') as file:
             file.write(json_object)
         #rename and copy file
-        os.rename(f'{curr_dir}',f'Interactive Offline Course/{self.course_no}')
+        # os.rename(f'{curr_dir}',f'Interactive Offline Course/{self.course_no}')
         shutil.move(os.path.join(os.path.dirname(__file__),'Interactive Offline Course'), copy_dir)
+        msg_box =tk.messagebox.showinfo('Success', 'Offline Course Package Created')
 
     def create_li_tag(self, to_append, soup, data_val, string):
         li_tag = soup.new_tag("li")
@@ -695,6 +697,7 @@ class CourseInfoPage(ctk.CTkFrame):
                 int(self.num_topics_entry.get()),
                 course_intro
                 )
+            msg_box =tk.messagebox.showinfo('Success', 'Course Info Saved')
 
     def result(self, *args):  # add *args to accomodate the vals passed by the trace
         self.remove_err('faculty')
@@ -757,6 +760,8 @@ class CourseInfoPage(ctk.CTkFrame):
                         self.num_topics_entry.insert(ctk.END, data['num_topics'])
                         for x in data['course_intro']:
                             self.course_intro_tb.insert(ctk.END, x+'\n')
+                            
+            msg_box =tk.messagebox.showinfo('Success', 'Metadata Found')
 
 class ResourcesPage(ctk.CTkFrame):
     def __init__(self, parent, controller):
@@ -796,7 +801,6 @@ class ResourcesPage(ctk.CTkFrame):
         if button_name == 'Course Guide':
             source = filedialog.askopenfilename(initialdir='/', title='Select Course Guide',
                                             filetypes=(('PDF', '*.pdf'), ("All Files", '*.*'),))
-            self.update()
         elif button_name == 'Folder':
             source = '{}'.format(filedialog.askdirectory(title='Select Folder'))
         elif button_name == 'File':
@@ -807,8 +811,11 @@ class ResourcesPage(ctk.CTkFrame):
             if button_name == 'Course Guide':
                 self.controller.save_course_guide(source)
                 self.course_guide_btn.configure(text='Change Course Guide')
+                msg_box =tk.messagebox.showinfo('Success', 'Course Guide Uploaded')
+                self.update()
             else:
                 self.controller.save_resources_dir(source, button_name)
+                msg_box =tk.messagebox.showinfo('Success', 'Resources Uploaded')
 
     def check_resources(self):
         resources_dir = self.controller.get_resources_dir()
@@ -850,6 +857,7 @@ class DelResourcesPage(ctk.CTkFrame):
         self.lb.delete(0, tk.END)
         for x in range(0,len(resources_dir)):
             self.lb.insert(x, resources_dir[x][0])
+        msg_box =tk.messagebox.showinfo('Success', 'Resource Deleted')
 
     def del_resources(self):
         try:
@@ -895,6 +903,7 @@ class UploadTopicsPage(ctk.CTkFrame):
         if source:
             topics_dir[value] = source
             self.controller.save_topics_dir(topics_dir)
+            msg_box =tk.messagebox.showinfo('Success', f'Topic {value} PDF Uploaded')
             self.update_btns()
 
 class CreateQuizPage(ctk.CTkFrame):
@@ -914,7 +923,7 @@ class CreateQuizPage(ctk.CTkFrame):
         footer.grid_columnconfigure(0, weight=8)
 
         webopen_btn=ctk.CTkButton(footer, text='What is GIFT format?', font=LARGEFONT,height=50,width=215,
-                               command= lambda: webbrowser.open(os.path.join(os.path.dirname(__file__),'manuals/','GIFT.pdf')))
+                               command= lambda: [webbrowser.open(os.path.join(os.path.dirname(__file__),'manuals/','GIFT Manual.pdf'))])
         webopen_btn.grid(row=1, column=1, sticky=ctk.E, padx=20, pady=20)
 
     def update_btns(self):
@@ -956,6 +965,7 @@ class CreateQuizPage(ctk.CTkFrame):
         questions = self.controller.get_questions()
         questions[value] = None
         self.controller.save_questions(questions)
+        msg_box =tk.messagebox.showinfo('Success', 'Quiz Deleted')
         self.update_btns()
 
     def create_quiz(self, value):
@@ -1023,6 +1033,7 @@ class CreateQuizPage(ctk.CTkFrame):
             if temp_questions != []:
                 questions[value] = temp_questions
                 self.controller.save_questions(questions)
+                msg_box =tk.messagebox.showinfo('Success', 'Quiz Uploaded')
                 self.update_btns()
 
 class CreateOCPPage(ctk.CTkFrame):    
