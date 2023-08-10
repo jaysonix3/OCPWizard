@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>Topic #X# Quiz</title>
+	<link href="../css/bootstrap.min.css" rel="stylesheet">
+	<link href="../css/quiz.css" rel="stylesheet">
+	<script type="text/javascript" src="../js/external/mootools-core-1.4.5-minified.js"></script>
+	<script type="text/javascript" src="../js/dg-quiz-maker.js"></script>
+	<meta charset="UTF-8">
+</head>
+
+<body>
+
+<div id="quiz-header"> 
+	<h2> Topic #X# Quiz </h2>
+	<ul>
+	<li/>Note that you need to get a perfect score in all the quizzes to be able to take the final exam. 
+	<li/>Nevertheless, you can take the quizzes as many times as you want.
+	</ul>
+	<p> Good luck! :) </p>
+	<hr>
+</div>
+<div id="questions"></div>
+<div id="error"></div>
+<div id="result"></div>
+
+<script type="text/javascript">
+
+function showWrongAnswer(){
+    document.id('error').set('html', 'Wrong answer, Please try again');
+}
+
+function showScore() {
+	var score = quizMaker.getScore();
+
+	var el = new Element('h3');
+	el.set('html', 'Thank you!');
+    document.id('result').adopt(el);
+
+	el = new Element('h4');
+	el.set('html', 'Score: ' + score.numCorrectAnswers + ' of ' + score.numQuestions + ' = ' + (score.numCorrectAnswers/score.numQuestions*100) + '%');
+    document.id('result').adopt(el);
+
+    //Do not show incorrect answers
+    
+	if(score.incorrectAnswers.length > 0) {
+		el = new Element('h4');
+		el.set('html', 'Incorrect answers:');
+        document.id('result').adopt(el);
+
+		for(var i=0;i<score.incorrectAnswers.length;i++) {
+			var incorrectAnswer = score.incorrectAnswers[i];
+			el = new Element('div');
+			el.set('html', '<b>' +  incorrectAnswer.questionNumber + ': ' + incorrectAnswer.label + '</b>');
+			document.id('result').adopt(el);
+
+			el = new Element('div');
+			el.set('html', 'Correct answer : ' + incorrectAnswer.correctAnswer);
+            document.id('result').adopt(el);
+			el = new Element('div');
+			el.set('html', 'Your answer : ' + incorrectAnswer.userAnswer);
+            document.id('result').adopt(el);
+
+		}
+	}
+	
+}
+
+var questions="#X#"
+
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
+function showAnswerAlert() {
+	document.id('error').set('html', 'You have to answer before you continue to the next question');
+}
+function clearErrorBox() {
+    document.id('error').set('html','');
+}
+
+ITEM_COUNT = "#X#"
+random_questions = shuffle(questions).slice(0,ITEM_COUNT)
+
+var quizMaker = new DG.QuizMaker({
+	questions : shuffle(random_questions),
+	el : 'questions',
+    forceCorrectAnswer:false,
+	listeners : {
+		'finish' : showScore,
+		'missinganswer' : showAnswerAlert,
+		'sendanswer' : clearErrorBox,
+        'wrongAnswer' : showWrongAnswer
+	}
+});
+
+
+
+quizMaker.start();
+
+
+</script>
+
+</body>
+</html>

@@ -687,7 +687,7 @@ class CourseInfoPage(ctk.CTkFrame):
         if valid:
             temp=self.course_intro_tb.get("1.0", 'end-1c').strip()
             course_intro = [temp1.strip() for temp1 in temp.split('\n') if temp1.strip()]
-            print(course_intro)
+            # print(course_intro)
             self.controller.save_course_info(
                 self.faculty_cb.get(),
                 self.course_no_entry.get().upper(),
@@ -727,7 +727,7 @@ class CourseInfoPage(ctk.CTkFrame):
         if source:
             for root, dir, files in os.walk(source):
                 if json_file in files:
-                    print('metadata found')
+                    # print('metadata found')
 
                     json_path = os.path.join(root, json_file)
                     with open(json_path, 'r') as json_file:
@@ -1016,7 +1016,9 @@ class CreateQuizPage(ctk.CTkFrame):
                 if is_valid_question:
                     temp_questions.append(current_question)
                 else:
-                    print('Invalid question format detected.')
+                    # print('Invalid question format detected.')
+                    # pass
+                    msg_box = tk.messagebox.showerror('Error', f'Invalid question format detected on line {x}')
 
             if temp_questions != []:
                 questions[value] = temp_questions
