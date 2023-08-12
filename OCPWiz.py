@@ -9,9 +9,9 @@ import random
 import shutil
 import subprocess
 import customtkinter as ctk
-from bs4 import BeautifulSoup
 from tkinter import filedialog
 from CTkListbox import CTkListbox
+from bs4 import BeautifulSoup, Comment
 from CTkMessagebox import CTkMessagebox
 from PIL import Image, ImageDraw, ImageFont
 
@@ -305,232 +305,248 @@ class OCPWizApp(ctk.CTk):
 
     # CREATE OCP-------------------------------------------------------------
     def create_ocp(self):
-        copy_dir=""
-        curr_dir = os.path.join('Interactive Offline Course/', f'{self.course_no}')
-        path = '{}'.format(filedialog.askdirectory(title='Select Folder'))
-        if path:
-            copy_dir = path
-        else:
-            msg_box = CTkMessagebox(title='Error', message='No folder selected',icon="cancel",button_color=forest_green, button_hover_color=forest_green_d,)
-        shutil.copytree(os.path.join(os.path.dirname(__file__),'files'),os.path.join(os.path.dirname(__file__),'Interactive Offline Course'))
-        os.rename(os.path.join(os.path.dirname(__file__),'Interactive Offline Course/', 'course'), os.path.join(os.path.dirname(__file__),curr_dir))
-        #introduction.html ---------------------------------------------------------------------------------------------------------------------
-        if self.course_guide_dir:
-                target = os.path.join(os.path.dirname(__file__),f'{curr_dir}/','modules')
-                dir_parts = list(os.path.split(self.course_guide_dir))
-                target_dir = os.path.join(target, 'CourseGuide.pdf')
-                shutil.copy2(self.course_guide_dir, target_dir)
-        
-        soup_new = self.createSoup(os.path.join(os.path.dirname(__file__), f'{curr_dir}/','introduction.html'))
-        h2 = soup_new.h2
-        h2.string = self.course_no + ' - ' + self.course_title
-        if self.course_intro:
-            for p in soup_new.find_all('p', class_=False):
-                p.decompose()
-            p_tag = soup_new.new_tag('p')
-            p_tag.string = self.course_intro[0]
-            soup_new.hr.insert_after(p_tag)
-            for course_intro_word in self.course_intro[1:]:
-                next_p = soup_new.find_all('p', class_=False)[-1]
+        try:
+            copy_dir=""
+            curr_dir = os.path.join('Interactive Offline Course/', f'{self.course_no}')
+            path = '{}'.format(filedialog.askdirectory(title='Select Folder'))
+            if path:
+                copy_dir = path
+            else:
+                msg_box = CTkMessagebox(title='Error', message='No folder selected',icon="cancel",button_color=forest_green, button_hover_color=forest_green_d,)
+            shutil.copytree(os.path.join(os.path.dirname(__file__),'files'),os.path.join(os.path.dirname(__file__),'Interactive Offline Course'))
+            os.rename(os.path.join(os.path.dirname(__file__),'Interactive Offline Course/', 'course'), os.path.join(os.path.dirname(__file__),curr_dir))
+            #introduction.html ---------------------------------------------------------------------------------------------------------------------
+            if self.course_guide_dir:
+                    target = os.path.join(os.path.dirname(__file__),f'{curr_dir}/','modules')
+                    dir_parts = list(os.path.split(self.course_guide_dir))
+                    target_dir = os.path.join(target, 'CourseGuide.pdf')
+                    shutil.copy2(self.course_guide_dir, target_dir)
+            
+            soup_new = self.createSoup(os.path.join(os.path.dirname(__file__), f'{curr_dir}/','introduction.html'))
+            h2 = soup_new.h2
+            h2.string = self.course_no + ' - ' + self.course_title
+            if self.course_intro:
+                for p in soup_new.find_all('p', class_=False):
+                    p.decompose()
                 p_tag = soup_new.new_tag('p')
-                p_tag.string = course_intro_word
-                next_p.insert_after(p_tag)
+                p_tag.string = self.course_intro[0]
+                soup_new.hr.insert_after(p_tag)
+                for course_intro_word in self.course_intro[1:]:
+                    next_p = soup_new.find_all('p', class_=False)[-1]
+                    p_tag = soup_new.new_tag('p')
+                    p_tag.string = course_intro_word
+                    next_p.insert_after(p_tag)
 
-        self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','introduction.html'), 
-                soup_new.prettify(formatter="html"))
-        
-        #course.html ---------------------------------------------------------------------------------------------------------------------
-        soup_new = self.createSoup(os.path.join(os.path.dirname(__file__),'template/','HTML/','course_template.html'))
-        to_append = []
-        new_title=soup_new.new_tag('title')
-        new_title.string=f'{self.course_no} Interactive Offline Course'
-        soup_new.html.head.title.replace_with(new_title)
-        for x in range(int(self.num_topics)):
-            self.create_li_tag(to_append,soup_new, x+1, f"Topic {x+1}",)
-        if self.questions['final'] != None:
-            self.create_li_tag(to_append,soup_new, self.num_topics+1, "Final Exam")
-        for x in to_append:
-            ul_tag = soup_new.find("ul")
-            ul_tag.append(x)
+            self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','introduction.html'), 
+                    soup_new.prettify(formatter="html"))
+            
+            #course.html ---------------------------------------------------------------------------------------------------------------------
+            soup_new = self.createSoup(os.path.join(os.path.dirname(__file__),'template/','HTML/','course_template.html'))
+            to_append = []
+            new_title=soup_new.new_tag('title')
+            new_title.string=f'{self.course_no} Interactive Offline Course'
+            soup_new.html.head.title.replace_with(new_title)
+            for x in range(int(self.num_topics)):
+                self.create_li_tag(to_append,soup_new, x+1, f"Topic {x+1}",)
+            if self.questions['final'] != None:
+                self.create_li_tag(to_append,soup_new, self.num_topics+1, "Final Exam")
+            for x in to_append:
+                ul_tag = soup_new.find("ul")
+                ul_tag.append(x)
 
-        self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','course.html'), 
-                soup_new.prettify(formatter="html"))
-        
-        #profile.html ---------------------------------------------------------------------------------------------------------------------
-        soup_new = self.createSoup(os.path.join(
-                    os.path.dirname(__file__),f'template/','HTML/','profile_template.html'))
-                
-        first_link = soup_new.find('p', class_='faculty')
-        first_link.string=self.faculty
-        
-        self.tag_replace(soup_new, "#Course#", self.course_no + ' - ' + self.course_title)
-    
-        self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','profile.html'), 
-            soup_new.prettify(formatter="html"))
-        
-        #register.html ---------------------------------------------------------------------------------------------------------------------
-        soup_new = self.createSoup(os.path.join(
-                    os.path.dirname(__file__),f'template/','HTML/','register_template.html'))
-                
-        self.tag_replace(soup_new,"#Course Name#", self.course_no)
-        self.tag_replace(soup_new,"#Course Title#", self.course_title)
-        
-        self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','register.html'), 
-            soup_new.prettify(formatter="html"))
-        
-        #resources.html ---------------------------------------------------------------------------------------------------------------------
-        if self.resources_dir:
-            # print(self.resources_dir)
-            temp = []
-            for src in self.resources_dir:
-                resourceName = src[0].split('/')[-1]
-                # print(resourceName)
-                dir = os.path.join(os.path.dirname(__file__),f'{curr_dir}/','resources/', f'{resourceName}')
-                if src[1] == 0:
-                    shutil.copytree(src[0], dir)
-                    hasPDF = False
-                    for root, dirs, files in os.walk(dir):
-                        for file in files:
-                            if file.endswith(".pdf"):
-                                hasPDF = True
-                    li_tag = soup_new.new_tag("li")
-                    a_tag = ""
-                    if hasPDF == True:
-                        a_tag = soup_new.new_tag("a", href=f"resources/{resourceName}", id="manual")
-                    else:
-                        a_tag = soup_new.new_tag("a", href=f"resources/{resourceName}")
-                    a_tag.string = resourceName
-                    li_tag.append(a_tag)
-                    temp.append(li_tag)
-                else:
-                    shutil.copy(src[0], dir)
-                    li_tag = soup_new.new_tag("li")
-                    a_tag = soup_new.new_tag("a", href=F"resources/{resourceName}")
-                    a_tag.string = resourceName
-                    li_tag.append(a_tag)
-                    temp.append(li_tag)
-
+            self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','course.html'), 
+                    soup_new.prettify(formatter="html"))
+            
+            #profile.html ---------------------------------------------------------------------------------------------------------------------
             soup_new = self.createSoup(os.path.join(
-                    os.path.dirname(__file__),f'template/','HTML/','resources_template.html'))
-            ol_tag = soup_new.find("ol")
-            for resource in temp:
-                ol_tag.append(resource)
-
-            self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','resources.html'), 
-                soup_new.prettify(formatter="html"))
-        
-        #login.html
-        soup_new = self.createSoup(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','login.html'))
-        new_title=soup_new.new_tag('title')
-        new_title.string=f'{self.course_no} Interactive Offline Course'
-        soup_new.html.head.title.replace_with(new_title)
-
-        self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','login.html'), 
-                soup_new.prettify(formatter="html"))
-        
-        #JS FILES ---------------------------------------------------------------------------------------------------------------------
-        set_score = ''
-        set_module = '['
-        for key, value in self.questions.items():
-            if self.questions[key] == None:
-                set_score += f'\nmodule_quiz[{key}] = -2;'
-                set_module += f'{key},'
-        set_module += ']'
-          
-        self.copy_file2(os.path.join(os.path.dirname(__file__),'template/','JS/','course.js'), 
-                    os.path.join(os.path.dirname(__file__),f'{curr_dir}/','js/','course.js'),
-                    'case "#X#":',"var modulesArray = '#X#'",
-                    f'case {self.num_topics+1}:', f'var modulesArray = {set_module}')
-        
-        self.copy_file2(os.path.join(os.path.dirname(__file__),'template/','JS/','register.js'), 
-                    os.path.join(os.path.dirname(__file__),f'{curr_dir}/','js/','register.js'),
-                    'for (var i = 1; i <= "#X#" ; i++) {',"'#Write X#'", 
-                    f"for (var i = 1; i <= {self.num_topics} ; i++) " +"{",set_score)
-        
-        self.copy_file(os.path.join(os.path.dirname(__file__),'template/','JS/','progress.js'), 
-                    os.path.join(os.path.dirname(__file__),f'{curr_dir}/','js/','progress.js'),
-                    "profile['current_module'] = '#X#';", 
-                    f"profile['current_module'] = {self.num_topics};",)
-
-        #CSS FILES ---------------------------------------------------------------------------------------------------------------------
-        self.copy_file(os.path.join(os.path.dirname(__file__),'template/','CSS/','course.css'), 
-                    os.path.join(os.path.dirname(__file__),f'{curr_dir}/','css/','course.css'),
-                    '#module_content li:nth-of-type("#X#"){', f'#module_content li:nth-of-type({self.num_topics+2})'+"{")
-        
-        #quiz_htmls ---------------------------------------------------------------------------------------------------------------------
-        for key,value in self.questions.items():
-            # print(key,value)
-            if self.questions[key] != None:
-                if key != 'final':
-                    soup_new = self.createSoup(os.path.join(
-                        os.path.dirname(__file__),'template/','HTML/','quiz_template.html'))
-                    # new_title = soup_new.find('title')
-                    new_title=soup_new.new_tag('title')
-                    new_title.string=f'Topic {key} Quiz'
-                    soup_new.html.head.title.replace_with(new_title)
-                    new_h2 = soup_new.find("h2")
-                    new_h2.string = f"Topic {key} Quiz"
-                    # print(value)
-                    self.write_script(soup_new, value)
+                        os.path.dirname(__file__),f'template/','HTML/','profile_template.html'))
                     
-                    self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','quiz/',f'quiz{key}.html'), 
-                        soup_new.prettify(formatter="html"))
-                else:
-                    soup_new = self.createSoup(os.path.join(
-                        os.path.dirname(__file__),'template/','HTML/','final-exam_template.html'))
-                    self.write_script(soup_new, value)
-                    self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','quiz/','final-exam.html'), 
-                        soup_new.prettify(formatter="html"))
-        #modules
-        for key, value in self.topics_dir.items():
-            target = os.path.join(os.path.dirname(__file__),f'{curr_dir}/','modules')
-            target_dir = os.path.join(target, f'Module{key}.pdf')
-            shutil.copy2(self.topics_dir[key], target_dir)
-
-        #banner
-        file = ""
-        match (self.faculty):
-            case "Faculty of Education":
-                file = os.path.join(os.path.dirname(__file__),'template/','Banner/','Images/','FoE.png')
-            case "Faculty of Information and Communication Studies":
-                file = os.path.join(os.path.dirname(__file__),'template/','Banner/','Images/','FICS.png')
-            case "Faculty of Management and Development Studies":
-                file = os.path.join(os.path.dirname(__file__),'template/','Banner/','Images/','FMDS.png')
-        with Image.open(file) as img:
-            W, H = img.size
-            font_name = ImageFont.truetype(os.path.join(
-                os.path.dirname(__file__),'template/','Banner/','Fonts/','lovtony.ttf'), 350)
-            font_title = ImageFont.truetype(os.path.join(
-                os.path.dirname(__file__),'template/','Banner/','Fonts/','Sansus Webissimo-Regular.otf'), 100)
-            draw = ImageDraw.Draw(img)
-            _, _, w_name, h_name = draw.textbbox((0, 0), self.course_no, font=font_name)
-            draw.text(((720+W-w_name)/2, ((H-h_name)/2)-100), self.course_no, font=font_name, fill='#8a1538')
-            _, _, w_title, h_title = draw.textbbox((0, 0), self.course_title, font=font_title)
-            draw.text(((720+W-w_title)/2, ((350+H-h_title)/2)), self.course_title, font=font_title, fill='#8a1538')
-            img.save(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','img/','Logo.png'))
+            first_link = soup_new.find('p', class_='faculty')
+            first_link.string=self.faculty
+            
+            self.tag_replace(soup_new, "#Course#", self.course_no + ' - ' + self.course_title)
         
-        #WRITE METADATA
-        dictionary = {
-                "faculty": self.faculty,
-                "course_no": self.course_no,
-                "course_title": self.course_title,
-                "num_topics": self.num_topics,
-                "course_intro": self.course_intro,
-                "course_guide_dir": self.course_guide_dir,
-                "resources_dir": self.resources_dir,
-                "topics_dir": self.topics_dir,
-                "questions": self.questions
-            }
+            self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','profile.html'), 
+                soup_new.prettify(formatter="html"))
+            
+            #register.html ---------------------------------------------------------------------------------------------------------------------
+            soup_new = self.createSoup(os.path.join(
+                        os.path.dirname(__file__),f'template/','HTML/','register_template.html'))
+                    
+            self.tag_replace(soup_new,"#Course Name#", self.course_no)
+            self.tag_replace(soup_new,"#Course Title#", self.course_title)
+            
+            self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','register.html'), 
+                soup_new.prettify(formatter="html"))
+            
+            #resources.html ---------------------------------------------------------------------------------------------------------------------
+            if self.resources_dir:
+                # print(self.resources_dir)
+                temp = []
+                for src in self.resources_dir:
+                    resourceName = src[0].split('/')[-1]
+                    # print(resourceName)
+                    dir = os.path.join(os.path.dirname(__file__),f'{curr_dir}/','resources/', f'{resourceName}')
+                    if src[1] == 0:
+                        shutil.copytree(src[0], dir)
+                        hasPDF = False
+                        for root, dirs, files in os.walk(dir):
+                            for file in files:
+                                if file.endswith(".pdf"):
+                                    hasPDF = True
+                        li_tag = soup_new.new_tag("li")
+                        a_tag = ""
+                        if hasPDF == True:
+                            a_tag = soup_new.new_tag("a", href=f"resources/{resourceName}", id="manual")
+                        else:
+                            a_tag = soup_new.new_tag("a", href=f"resources/{resourceName}")
+                        a_tag.string = resourceName
+                        li_tag.append(a_tag)
+                        temp.append(li_tag)
+                    else:
+                        shutil.copy(src[0], dir)
+                        li_tag = soup_new.new_tag("li")
+                        a_tag = soup_new.new_tag("a", href=F"resources/{resourceName}")
+                        a_tag.string = resourceName
+                        li_tag.append(a_tag)
+                        temp.append(li_tag)
 
-        json_object = json.dumps(dictionary, indent=4)
+                soup_new = self.createSoup(os.path.join(
+                        os.path.dirname(__file__),f'template/','HTML/','resources_template.html'))
+                ol_tag = soup_new.find("ol")
+                for resource in temp:
+                    ol_tag.append(resource)
 
-        with open(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','js/','metadata.json'), 'w') as file:
-            file.write(json_object)
-        #rename and copy file
-        # os.rename(f'{curr_dir}',f'Interactive Offline Course/{self.course_no}')
-        shutil.move(os.path.join(os.path.dirname(__file__),'Interactive Offline Course'), copy_dir)
-        msg_box = CTkMessagebox(title='Success', message='Offline Course Package Created', icon='check', button_color=forest_green, button_hover_color=forest_green_d,)
+                self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','resources.html'), 
+                    soup_new.prettify(formatter="html"))
+            
+            #login.html
+            soup_new = self.createSoup(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','login.html'))
+            new_title=soup_new.new_tag('title')
+            new_title.string=f'{self.course_no} Interactive Offline Course'
+            soup_new.html.head.title.replace_with(new_title)
 
+            self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','login.html'), 
+                    soup_new.prettify(formatter="html"))
+            
+            #progress.html
+            if self.questions['final'] == None:
+                soup_new = self.createSoup(os.path.join(os.path.dirname(__file__),'template/','HTML/','progress_template.html'))
+                to_cmt = soup_new.find('div', class_='to_comment_out')
+                to_cmt.replace_with(Comment(str(to_cmt)))
+
+                self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','progress.html'), 
+                    soup_new.prettify(formatter="html"))
+
+            # print(soup_new)
+            soup_new.find_all
+            #JS FILES ---------------------------------------------------------------------------------------------------------------------
+            set_score = ''
+            set_module = '['
+            for key, value in self.questions.items():
+                if self.questions[key] == None:
+                    if key != 'final':
+                        set_score += f'\nmodule_quiz[{key}] = -2;'
+                        set_module += f'{key},'
+                    else:
+                        set_score += f"\nmodule_quiz['{key}'] = -2;"
+            set_module += ']'
+            
+            self.copy_file2(os.path.join(os.path.dirname(__file__),'template/','JS/','course.js'), 
+                        os.path.join(os.path.dirname(__file__),f'{curr_dir}/','js/','course.js'),
+                        'case "#X#":',"var modulesArray = '#X#'",
+                        f'case {self.num_topics+1}:', f'var modulesArray = {set_module}')
+            
+            self.copy_file2(os.path.join(os.path.dirname(__file__),'template/','JS/','register.js'), 
+                        os.path.join(os.path.dirname(__file__),f'{curr_dir}/','js/','register.js'),
+                        'for (var i = 1; i <= "#X#" ; i++) {', "'#Write X#'", 
+                        f"for (var i = 1; i <= {self.num_topics} ; i++) " +"{", set_score)
+            
+            self.copy_file(os.path.join(os.path.dirname(__file__),'template/','JS/','progress.js'), 
+                        os.path.join(os.path.dirname(__file__),f'{curr_dir}/','js/','progress.js'),
+                        "profile['current_module'] = '#X#';", 
+                        f"profile['current_module'] = {self.num_topics};",)
+
+            #CSS FILES ---------------------------------------------------------------------------------------------------------------------
+            self.copy_file(os.path.join(os.path.dirname(__file__),'template/','CSS/','course.css'), 
+                        os.path.join(os.path.dirname(__file__),f'{curr_dir}/','css/','course.css'),
+                        '#module_content li:nth-of-type("#X#"){', f'#module_content li:nth-of-type({self.num_topics+2})'+"{")
+            
+            #quiz_htmls ---------------------------------------------------------------------------------------------------------------------
+            for key,value in self.questions.items():
+                # print(key,value)
+                if self.questions[key] != None:
+                    if key != 'final':
+                        soup_new = self.createSoup(os.path.join(
+                            os.path.dirname(__file__),'template/','HTML/','quiz_template.html'))
+                        # new_title = soup_new.find('title')
+                        new_title=soup_new.new_tag('title')
+                        new_title.string=f'Topic {key} Quiz'
+                        soup_new.html.head.title.replace_with(new_title)
+                        new_h2 = soup_new.find("h2")
+                        new_h2.string = f"Topic {key} Quiz"
+                        # print(value)
+                        self.write_script(soup_new, value)
+                        
+                        self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','quiz/',f'quiz{key}.html'), 
+                            soup_new.prettify(formatter="html"))
+                    else:
+                        soup_new = self.createSoup(os.path.join(
+                            os.path.dirname(__file__),'template/','HTML/','final-exam_template.html'))
+                        self.write_script(soup_new, value)
+                        self.write_to_html(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','quiz/','final-exam.html'), 
+                            soup_new.prettify(formatter="html"))
+            #modules
+            for key, value in self.topics_dir.items():
+                target = os.path.join(os.path.dirname(__file__),f'{curr_dir}/','modules')
+                target_dir = os.path.join(target, f'Module{key}.pdf')
+                shutil.copy2(self.topics_dir[key], target_dir)
+
+            #banner
+            file = ""
+            match (self.faculty):
+                case "Faculty of Education":
+                    file = os.path.join(os.path.dirname(__file__),'template/','Banner/','Images/','FoE.png')
+                case "Faculty of Information and Communication Studies":
+                    file = os.path.join(os.path.dirname(__file__),'template/','Banner/','Images/','FICS.png')
+                case "Faculty of Management and Development Studies":
+                    file = os.path.join(os.path.dirname(__file__),'template/','Banner/','Images/','FMDS.png')
+            with Image.open(file) as img:
+                W, H = img.size
+                font_name = ImageFont.truetype(os.path.join(
+                    os.path.dirname(__file__),'template/','Banner/','Fonts/','lovtony.ttf'), 350)
+                font_title = ImageFont.truetype(os.path.join(
+                    os.path.dirname(__file__),'template/','Banner/','Fonts/','Sansus Webissimo-Regular.otf'), 100)
+                draw = ImageDraw.Draw(img)
+                _, _, w_name, h_name = draw.textbbox((0, 0), self.course_no, font=font_name)
+                draw.text(((720+W-w_name)/2, ((H-h_name)/2)-100), self.course_no, font=font_name, fill='#8a1538')
+                _, _, w_title, h_title = draw.textbbox((0, 0), self.course_title, font=font_title)
+                draw.text(((720+W-w_title)/2, ((350+H-h_title)/2)), self.course_title, font=font_title, fill='#8a1538')
+                img.save(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','img/','Logo.png'))
+            
+            #WRITE METADATA
+            dictionary = {
+                    "faculty": self.faculty,
+                    "course_no": self.course_no,
+                    "course_title": self.course_title,
+                    "num_topics": self.num_topics,
+                    "course_intro": self.course_intro,
+                    "course_guide_dir": self.course_guide_dir,
+                    "resources_dir": self.resources_dir,
+                    "topics_dir": self.topics_dir,
+                    "questions": self.questions
+                }
+
+            json_object = json.dumps(dictionary, indent=4)
+
+            with open(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','js/','metadata.json'), 'w') as file:
+                file.write(json_object)
+            #rename and copy file
+            # os.rename(f'{curr_dir}',f'Interactive Offline Course/{self.course_no}')
+            shutil.move(os.path.join(os.path.dirname(__file__),'Interactive Offline Course'), copy_dir)
+            msg_box = CTkMessagebox(title='Success', message='Offline Course Package Created', icon='check', button_color=forest_green, button_hover_color=forest_green_d,)
+        except Exception as error:
+            print(error)
     def create_li_tag(self, to_append, soup, data_val, string):
         li_tag = soup.new_tag("li")
         a_tag = soup.new_tag("a", href="#")
