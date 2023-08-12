@@ -8,25 +8,31 @@ import base64
 import random
 import shutil
 import webbrowser
-import tkinter as tk
 import customtkinter as ctk
 from bs4 import BeautifulSoup
 from tkinter import filedialog
+from CTkListbox import CTkListbox
+from CTkMessagebox import CTkMessagebox
 from PIL import Image, ImageDraw, ImageFont
 
 ctk.set_appearance_mode('system')  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme('green')  # Themes: "blue" (standard), "green", "dark-blue"
 LARGEFONT = ('Helvetica', 14)
+
 up_maroon = '#850038'
-up_maroon_l = '#9F1A52'
-up_maroon_d = '#6C001F'
+up_maroon_l = '#f60068'
+up_maroon_d = '#5d0027'
+
 forest_green = '#0e6021'
-yellow_gold = '#ffac0d'
+forest_green_l = '#1dc945'
+forest_green_d = '#0a4317'
+
+# yellow_gold = '#ffac0d'
 
 class OCPWizApp(ctk.CTk):
     def __init__(self, *args, **kwargs):
         ctk.CTk.__init__(self, *args, **kwargs)
-
+        ctk.set_appearance_mode('dark')
         self.geometry('800x600')
         self.title('OCPWiz')
         self.resizable(False,False)
@@ -50,19 +56,20 @@ class OCPWizApp(ctk.CTk):
         self.frames[ctk.CTkFrame]=sidebar_frame
         
         
-        img = Image.open(os.path.join(os.path.dirname(__file__),'files/', 'course/', 'img/', 'upou.png'))
-        width, height = img.size
-        width_new=int(width/6)
-        height_new=int(height/6)
-        my_img = ctk.CTkImage(light_image=img,
-                              size=(width_new,height_new))
-        
+
         self.sidebar_head = ctk.CTkFrame(sidebar_frame,width=165,height=120,fg_color=up_maroon)
         self.sidebar_head.grid(row=0, column=0, columnspan=1, )
         self.sidebar_head.pack_propagate(False)
 
-        img_label = ctk.CTkLabel(self.sidebar_head, image=my_img, text='')
-        img_label.pack(pady=(30,0))
+        with Image.open(os.path.join(os.path.dirname(__file__),'files/', 'course/', 'img/', 'upou.png')) as img:
+            width, height = img.size
+            width_new=int(width/6)
+            height_new=int(height/6)
+            my_img = ctk.CTkImage(light_image=img,
+                                size=(width_new,height_new))
+            img_label = ctk.CTkLabel(self.sidebar_head, image=my_img, text='')
+            img_label.pack(pady=(30,0))
+        
         #COURSE INFO BTN------------------------------------------------------------------------------------------------------------------------------------
         self.course_info_btn = ctk.CTkButton(sidebar_frame,text="Course Info",width=165,height=70,font=LARGEFONT,anchor="w",fg_color=up_maroon, hover_color=up_maroon_d,
                                              command=lambda: self.indicate(self.course_info_btn, CourseInfoPage,))
@@ -136,14 +143,14 @@ class OCPWizApp(ctk.CTk):
                 self.update_num_topics()
             self.enable_buttons()
         elif self.num_topics != num_topics:
-            msg_box = tk.messagebox.askokcancel('Warning', 'Changing the number of topics will remove all uploaded PDFs and saved quizzes. Continue?')
-            if msg_box:
+            msg_box = CTkMessagebox(title='Warning', message='Changing the number of topics will remove all uploaded PDFs and saved quizzes. Continue?',
+                                icon='warning', option_1='Yes', option_2='No')
+            if msg_box.get()=='Yes':
                 self.set_details(faculty, course_no, course_title, num_topics, course_intro)
                 self.topics_dir.clear()
                 self.questions.clear()
                 self.update_num_topics()
                 self.enable_buttons()
-        self.test()
 
     def set_details(self,faculty, course_no, course_title, num_topics, course_intro):
         self.faculty = faculty
@@ -177,6 +184,7 @@ class OCPWizApp(ctk.CTk):
         self.resources_dir.sort(key=lambda x: (x[1], x[0]))
         
     def delete_resource_dir(self, value):
+        print(self.resources_dir[value])
         del self.resources_dir[value]
 
     def save_topics_dir(self, topics_dir):
@@ -275,7 +283,7 @@ class OCPWizApp(ctk.CTk):
     #TEST------------------------
     def check_ocp(self):
         if self.course_guide_dir == '':
-            msg_box = tk.messagebox.showerror('Error', 'No Course Guide Uploaded.')
+            msg_box = CTkMessagebox(title="Error", message="No Course Guide Uploaded", icon="cancel", button_color=forest_green, button_hover_color=forest_green_d,)
             return
         
         no_topics = False
@@ -286,7 +294,7 @@ class OCPWizApp(ctk.CTk):
                 no_topics = True
 
         if no_topics:
-            msg_box = tk.messagebox.showerror('Error', no_topic_pdf[:-2])
+            msg_box = CTkMessagebox(title='Error', message=f'{no_topic_pdf[:-2]}', icon="cancel",button_color=forest_green, button_hover_color=forest_green_d,)
             return
         
         self.refresh_createOCPPage()
@@ -303,7 +311,7 @@ class OCPWizApp(ctk.CTk):
         if path:
             copy_dir = path
         else:
-            tk.messagebox.showerror("Error", "No folder selected")
+            msg_box = CTkMessagebox(title='Error', message='No folder selected',icon="cancel",button_color=forest_green, button_hover_color=forest_green_d,)
         shutil.copytree(os.path.join(os.path.dirname(__file__),'files'),os.path.join(os.path.dirname(__file__),'Interactive Offline Course'))
         os.rename(os.path.join(os.path.dirname(__file__),'Interactive Offline Course/', 'course'), os.path.join(os.path.dirname(__file__),curr_dir))
         #introduction.html ---------------------------------------------------------------------------------------------------------------------
@@ -488,18 +496,18 @@ class OCPWizApp(ctk.CTk):
                 file = os.path.join(os.path.dirname(__file__),'template/','Banner/','Images/','FICS.png')
             case "Faculty of Management and Development Studies":
                 file = os.path.join(os.path.dirname(__file__),'template/','Banner/','Images/','FMDS.png')
-        img = Image.open(file)
-        W, H = img.size
-        font_name = ImageFont.truetype(os.path.join(
-            os.path.dirname(__file__),'template/','Banner/','Fonts/','lovtony.ttf'), 350)
-        font_title = ImageFont.truetype(os.path.join(
-            os.path.dirname(__file__),'template/','Banner/','Fonts/','Sansus Webissimo-Regular.otf'), 100)
-        draw = ImageDraw.Draw(img)
-        _, _, w_name, h_name = draw.textbbox((0, 0), self.course_no, font=font_name)
-        draw.text(((720+W-w_name)/2, ((H-h_name)/2)-100), self.course_no, font=font_name, fill='#8a1538')
-        _, _, w_title, h_title = draw.textbbox((0, 0), self.course_title, font=font_title)
-        draw.text(((720+W-w_title)/2, ((350+H-h_title)/2)), self.course_title, font=font_title, fill='#8a1538')
-        img.save(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','img/','Logo.png'))
+        with Image.open(file) as img:
+            W, H = img.size
+            font_name = ImageFont.truetype(os.path.join(
+                os.path.dirname(__file__),'template/','Banner/','Fonts/','lovtony.ttf'), 350)
+            font_title = ImageFont.truetype(os.path.join(
+                os.path.dirname(__file__),'template/','Banner/','Fonts/','Sansus Webissimo-Regular.otf'), 100)
+            draw = ImageDraw.Draw(img)
+            _, _, w_name, h_name = draw.textbbox((0, 0), self.course_no, font=font_name)
+            draw.text(((720+W-w_name)/2, ((H-h_name)/2)-100), self.course_no, font=font_name, fill='#8a1538')
+            _, _, w_title, h_title = draw.textbbox((0, 0), self.course_title, font=font_title)
+            draw.text(((720+W-w_title)/2, ((350+H-h_title)/2)), self.course_title, font=font_title, fill='#8a1538')
+            img.save(os.path.join(os.path.dirname(__file__),f'{curr_dir}/','img/','Logo.png'))
         
         #WRITE METADATA
         dictionary = {
@@ -521,7 +529,7 @@ class OCPWizApp(ctk.CTk):
         #rename and copy file
         # os.rename(f'{curr_dir}',f'Interactive Offline Course/{self.course_no}')
         shutil.move(os.path.join(os.path.dirname(__file__),'Interactive Offline Course'), copy_dir)
-        msg_box =tk.messagebox.showinfo('Success', 'Offline Course Package Created')
+        msg_box = CTkMessagebox(title='Success', message='Offline Course Package Created', icon='check', button_color=forest_green, button_hover_color=forest_green_d,)
 
     def create_li_tag(self, to_append, soup, data_val, string):
         li_tag = soup.new_tag("li")
@@ -574,9 +582,9 @@ class OCPWizApp(ctk.CTk):
             pass
 
     def createSoup(self,dir):
-        html_report_part= open(dir,'r')
-        soup = BeautifulSoup(html_report_part, 'html.parser')
-        return copy.deepcopy(soup)
+        with open(dir, 'r') as html_report_part:
+            soup = BeautifulSoup(html_report_part, 'html.parser')
+            return copy.deepcopy(soup)
     
 class CourseInfoPage(ctk.CTkFrame):
     def __init__(self, parent, controller):
@@ -655,11 +663,11 @@ class CourseInfoPage(ctk.CTkFrame):
         self.course_intro_tb=ctk.CTkTextbox(course_info_page, font=LARGEFONT, height=150, width=410)
         self.course_intro_tb.grid(row=14,column=1,sticky=ctk.W, columnspan=2)
 
-        upload_btn = ctk.CTkButton(footer, text='Edit Existing Offline Course Package', font=LARGEFONT,height=50,width=215,
+        upload_btn = ctk.CTkButton(footer, text='Edit Existing Offline Course Package', font=LARGEFONT,height=50,width=215,fg_color=forest_green, hover_color=forest_green_d,
                                command= lambda: self.edit_ocp())
         upload_btn.grid(row=1, column=0, sticky=ctk.E, padx=20, pady=20)
         
-        save_btn=ctk.CTkButton(footer, text='Save', font=LARGEFONT,height=50,width=215,
+        save_btn=ctk.CTkButton(footer, text='Save', font=LARGEFONT,height=50,width=215,fg_color=forest_green, hover_color=forest_green_d,
                                command= lambda: self.save())
         save_btn.grid(row=1, column=1, sticky=ctk.E, padx=20, pady=20)
 
@@ -681,9 +689,9 @@ class CourseInfoPage(ctk.CTkFrame):
             self.course_title_err.configure(text="Please enter the Course Title")
             valid = False
 
-        if self.num_topics_entry.get() == '':
+        if self.num_topics_entry.get() == '' or int(self.num_topics_entry.get()) < 1 :
             self.num_topics_entry.configure(border_color='red')
-            self.num_topics_err.configure(text="Please enter the Number of Topics")
+            self.num_topics_err.configure(text="Please enter a valid Number of Topics (>0)")
             valid = False
 
         if valid:
@@ -697,7 +705,7 @@ class CourseInfoPage(ctk.CTkFrame):
                 int(self.num_topics_entry.get()),
                 course_intro
                 )
-            msg_box =tk.messagebox.showinfo('Success', 'Course Info Saved')
+            msg_box =CTkMessagebox(title='Success', message='Course Info Saved', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
 
     def result(self, *args):  # add *args to accomodate the vals passed by the trace
         self.remove_err('faculty')
@@ -760,8 +768,7 @@ class CourseInfoPage(ctk.CTkFrame):
                         self.num_topics_entry.insert(ctk.END, data['num_topics'])
                         for x in data['course_intro']:
                             self.course_intro_tb.insert(ctk.END, x+'\n')
-                            
-            msg_box =tk.messagebox.showinfo('Success', 'Metadata Found')
+            msg_box =CTkMessagebox(title='Success', message='Metadata Found', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
 
 class ResourcesPage(ctk.CTkFrame):
     def __init__(self, parent, controller):
@@ -781,21 +788,21 @@ class ResourcesPage(ctk.CTkFrame):
         else:
             btn_text = 'Upload Course Guide'
 
-        self.course_guide_btn = ctk.CTkButton(self.resources_page,text=btn_text, font=LARGEFONT,width=410,height=40,
+        self.course_guide_btn = ctk.CTkButton(self.resources_page,text=btn_text, font=LARGEFONT,width=410,height=40,fg_color=forest_green, hover_color=forest_green_d,
                         command=lambda value='Course Guide': self.save_dirs(value))
-        self.course_guide_btn.grid(row=1,column=1,sticky=tk.W,pady=20)
+        self.course_guide_btn.grid(row=1,column=1,sticky=ctk.W,pady=20)
 
-        resources_btn = ctk.CTkButton(self.resources_page,text='Add Folders', font=LARGEFONT,width=410,height=40,
+        resources_btn = ctk.CTkButton(self.resources_page,text='Add Folders', font=LARGEFONT,width=410,height=40,fg_color=forest_green, hover_color=forest_green_d,
                         command=lambda value='Folder': self.save_dirs(value))
-        resources_btn.grid(row=2,column=1,sticky=tk.W,pady=20)
+        resources_btn.grid(row=2,column=1,sticky=ctk.W,pady=20)
 
-        files_btn = ctk.CTkButton(self.resources_page,text='Add Files', font=LARGEFONT,width=410,height=40,
+        files_btn = ctk.CTkButton(self.resources_page,text='Add Files', font=LARGEFONT,width=410,height=40,fg_color=forest_green, hover_color=forest_green_d,
                         command=lambda value='File': self.save_dirs(value))
-        files_btn.grid(row=3,column=1,sticky=tk.W,pady=20)
+        files_btn.grid(row=3,column=1,sticky=ctk.W,pady=20)
 
-        files_btn = ctk.CTkButton(self.resources_page,text='Remove Resources', font=LARGEFONT,width=410,height=40,
+        files_btn = ctk.CTkButton(self.resources_page,text='Remove Resources', font=LARGEFONT,width=410,height=40,fg_color=forest_green, hover_color=forest_green_d,
                         command=lambda: self.check_resources())
-        files_btn.grid(row=4,column=1,sticky=tk.W,pady=20)
+        files_btn.grid(row=4,column=1,sticky=ctk.W,pady=20)
 
     def save_dirs(self, button_name):
         if button_name == 'Course Guide':
@@ -811,16 +818,16 @@ class ResourcesPage(ctk.CTkFrame):
             if button_name == 'Course Guide':
                 self.controller.save_course_guide(source)
                 self.course_guide_btn.configure(text='Change Course Guide')
-                msg_box =tk.messagebox.showinfo('Success', 'Course Guide Uploaded')
+                msg_box =CTkMessagebox(title='Success', message='Course Guide Uploaded', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
                 self.update()
             else:
                 self.controller.save_resources_dir(source, button_name)
-                msg_box =tk.messagebox.showinfo('Success', 'Resources Uploaded')
+                msg_box =CTkMessagebox(title='Success', message='Resources Uploaded', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
 
     def check_resources(self):
         resources_dir = self.controller.get_resources_dir()
         if len(resources_dir) == 0:
-            tk.messagebox.showerror('Error', 'No Resources Available.')
+            msg_box = CTkMessagebox(title='Error', message='No Resources Available.',icon="cancel",button_color=forest_green, button_hover_color=forest_green_d,)
         else:
             self.controller.refresh_delResourcePage()
             self.controller.indicate(self.controller.resources_btn,DelResourcesPage)
@@ -841,33 +848,37 @@ class DelResourcesPage(ctk.CTkFrame):
         footer.grid_propagate(False)
         footer.grid_columnconfigure(0, weight=8)
 
-        self.lb = tk.Listbox(del_resources_page,height=10, width=410,font=LARGEFONT)
-        self.lb.grid(row=1,column=1,sticky=ctk.W, columnspan=2,pady=20)
+        self.lb2 = CTkListbox(del_resources_page,height=10, width=410,font=LARGEFONT)
+        self.lb2.grid(row=2,column=1,sticky=ctk.W, columnspan=2,pady=20)
 
-        delete_btn=ctk.CTkButton(footer,text="Delete",font=LARGEFONT,height=50,width=215,
+        delete_btn=ctk.CTkButton(footer,text="Delete",font=LARGEFONT,height=50,width=215,fg_color=forest_green, hover_color=forest_green_d,
                                     command=lambda: self.del_resources())
-        delete_btn.grid(row=1,column=1,sticky=tk.E,padx=20, pady=20)
+        delete_btn.grid(row=1,column=1,sticky=ctk.E,padx=20, pady=20)
 
-        back_btn=ctk.CTkButton(footer,text="Back",font=LARGEFONT,height=50,width=215,
+        back_btn=ctk.CTkButton(footer,text="Back",font=LARGEFONT,height=50,width=215,fg_color=forest_green, hover_color=forest_green_d,
                                     command=lambda: self.controller.indicate(self.controller.resources_btn,ResourcesPage))
-        back_btn.grid(row=1,column=0,sticky=tk.E,padx=20, pady=20)
+        back_btn.grid(row=1,column=0,sticky=ctk.E,padx=20, pady=20)
 
     def update_lb(self):
         resources_dir = self.controller.get_resources_dir()
-        self.lb.delete(0, tk.END)
-        for x in range(0,len(resources_dir)):
-            self.lb.insert(x, resources_dir[x][0])
-        msg_box =tk.messagebox.showinfo('Success', 'Resource Deleted')
+        if len(resources_dir) != 0 and self.lb2.size() != 0:
+            x = len(resources_dir)
+            while x != 0:
+                self.lb2.delete(x-1)
+                x-=1
+        for x in range(len(resources_dir)):
+            self.lb2.insert(x, resources_dir[x][0])
 
     def del_resources(self):
         try:
-            selection = self.lb.curselection()
-            self.lb.delete(selection[0])
-            self.controller.delete_resource_dir(selection[0])
-            if self.lb.size()==0:
+            selection = self.lb2.curselection()
+            self.lb2.delete(selection)
+            self.controller.delete_resource_dir(selection)
+            msg_box =CTkMessagebox(title='Success', message='Resource Deleted', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
+            if self.lb2.size()==0:
                 self.controller.indicate(self.controller.resources_btn, ResourcesPage)
         except:
-            msg_box = tk.messagebox.showerror('Error', 'Please select a file/folder to delete.')
+            msg_box = CTkMessagebox(title='Error', message='Please select a file/folder to delete.',icon="cancel",button_color=forest_green, button_hover_color=forest_green_d,)
 
 class UploadTopicsPage(ctk.CTkFrame):
     def __init__(self, parent, controller):
@@ -892,9 +903,9 @@ class UploadTopicsPage(ctk.CTkFrame):
                 btn_text = f'Change Topic {k} PDF'
             else:
                 btn_text = f'Upload Topic {k} PDF'
-            btn = ctk.CTkButton(self.upload_topics_page,text=btn_text, font=LARGEFONT,width=410,height=40,
+            btn = ctk.CTkButton(self.upload_topics_page,text=btn_text, font=LARGEFONT,width=410,height=40,fg_color=forest_green, hover_color=forest_green_d,
                         command=lambda value=k: self.save_topics_dir(value))
-            btn.grid(row=k,column=1,sticky=tk.W,pady=20)
+            btn.grid(row=k,column=1,sticky=ctk.W,pady=20)
 
     def save_topics_dir(self, value):
         source = filedialog.askopenfilename(initialdir='/', title=f'Select Topic {value} PDF',
@@ -903,7 +914,7 @@ class UploadTopicsPage(ctk.CTkFrame):
         if source:
             topics_dir[value] = source
             self.controller.save_topics_dir(topics_dir)
-            msg_box =tk.messagebox.showinfo('Success', f'Topic {value} PDF Uploaded')
+            msg_box =CTkMessagebox(title='Success', message=f'Topic {value} PDF Uploaded', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
             self.update_btns()
 
 class CreateQuizPage(ctk.CTkFrame):
@@ -922,7 +933,7 @@ class CreateQuizPage(ctk.CTkFrame):
         footer.grid_propagate(False)
         footer.grid_columnconfigure(0, weight=8)
 
-        webopen_btn=ctk.CTkButton(footer, text='What is GIFT format?', font=LARGEFONT,height=50,width=215,
+        webopen_btn=ctk.CTkButton(footer, text='What is GIFT format?', font=LARGEFONT,height=50,width=215,fg_color=forest_green, hover_color=forest_green_d,
                                command= lambda: [webbrowser.open(os.path.join(os.path.dirname(__file__),'manuals/','GIFT Manual.pdf'))])
         webopen_btn.grid(row=1, column=1, sticky=ctk.E, padx=20, pady=20)
 
@@ -936,36 +947,36 @@ class CreateQuizPage(ctk.CTkFrame):
             if questions[k] != None:
                 if k != 'final':
                     btn_text = f'Change Quiz {k}'
-                    del_btn = ctk.CTkButton(self.create_quiz_page,text='Delete', font=LARGEFONT,width=10,height=40,fg_color=up_maroon,
+                    del_btn = ctk.CTkButton(self.create_quiz_page,text='Delete', font=LARGEFONT,width=10,height=40,fg_color=up_maroon,hover_color=up_maroon_d,
                                 command=lambda value=k: self.delete(value))
-                    del_btn.grid(row=k,column=1,sticky=tk.E,pady=20)
-                    btn = ctk.CTkButton(self.create_quiz_page,text=btn_text, font=LARGEFONT,width=355,height=40,
+                    del_btn.grid(row=k,column=1,sticky=ctk.E,pady=20)
+                    btn = ctk.CTkButton(self.create_quiz_page,text=btn_text, font=LARGEFONT,width=355,height=40,fg_color=forest_green, hover_color=forest_green_d,
                                 command=lambda value=k: [self.create_quiz(value)])
-                    btn.grid(row=k,column=2,sticky=tk.W,pady=20)
+                    btn.grid(row=k,column=2,sticky=ctk.W,pady=20)
                 elif k == 'final':
                     btn_text = f'Change Final Quiz'
-                    del_btn = ctk.CTkButton(self.create_quiz_page,text='Delete', font=LARGEFONT,width=10,height=40,fg_color=up_maroon,
+                    del_btn = ctk.CTkButton(self.create_quiz_page,text='Delete', font=LARGEFONT,width=10,height=40,fg_color=up_maroon, hover_color=up_maroon_d,
                                 command=lambda value=k: self.delete(value))
-                    del_btn.grid(row=len(questions),column=1,sticky=tk.E,pady=20)
-                    btn = ctk.CTkButton(self.create_quiz_page,text=btn_text, font=LARGEFONT,width=355,height=40,
+                    del_btn.grid(row=len(questions),column=1,sticky=ctk.E,pady=20)
+                    btn = ctk.CTkButton(self.create_quiz_page,text=btn_text, font=LARGEFONT,width=355,height=40,fg_color=forest_green, hover_color=forest_green_d,
                                 command=lambda value=k: [self.create_quiz(value)])
-                    btn.grid(row=len(questions),column=2,sticky=tk.W,pady=20)
+                    btn.grid(row=len(questions),column=2,sticky=ctk.W,pady=20)
             elif questions[k] == None and k == 'final':
                 btn_text = f'Create Final Quiz'
-                btn = ctk.CTkButton(self.create_quiz_page,text=btn_text, font=LARGEFONT,width=410,height=40,
+                btn = ctk.CTkButton(self.create_quiz_page,text=btn_text, font=LARGEFONT,width=410,height=40,fg_color=forest_green, hover_color=forest_green_d,
                                 command=lambda value=k: [self.create_quiz(value)])
-                btn.grid(row=len(questions),column=1,sticky=tk.W,pady=20, columnspan=2)
+                btn.grid(row=len(questions),column=1,sticky=ctk.W,pady=20, columnspan=2)
             else:
                 btn_text = f'Create Quiz {k}'
-                btn = ctk.CTkButton(self.create_quiz_page,text=btn_text, font=LARGEFONT,width=410,height=40,
+                btn = ctk.CTkButton(self.create_quiz_page,text=btn_text, font=LARGEFONT,width=410,height=40,fg_color=forest_green, hover_color=forest_green_d,
                                 command=lambda value=k: [self.create_quiz(value)])
-                btn.grid(row=k,column=1,sticky=tk.W,pady=20, columnspan=2)
+                btn.grid(row=k,column=1,sticky=ctk.W,pady=20, columnspan=2)
          
     def delete(self,value):
         questions = self.controller.get_questions()
         questions[value] = None
         self.controller.save_questions(questions)
-        msg_box =tk.messagebox.showinfo('Success', 'Quiz Deleted')
+        msg_box =CTkMessagebox(title='Success', message='Quiz Deleted', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
         self.update_btns()
 
     def create_quiz(self, value):
@@ -1028,12 +1039,12 @@ class CreateQuizPage(ctk.CTkFrame):
                 else:
                     # print('Invalid question format detected.')
                     # pass
-                    msg_box = tk.messagebox.showerror('Error', f'Invalid question format detected on line {x}')
+                    msg_box = CTkMessagebox(title='Error', message=f'Invalid question format detected on line {x}',icon="cancel",button_color=forest_green, button_hover_color=forest_green_d,)
 
             if temp_questions != []:
                 questions[value] = temp_questions
                 self.controller.save_questions(questions)
-                msg_box =tk.messagebox.showinfo('Success', 'Quiz Uploaded')
+                msg_box =CTkMessagebox(title='Success', message='Quiz Uploaded', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
                 self.update_btns()
 
 class CreateOCPPage(ctk.CTkFrame):    
@@ -1052,7 +1063,7 @@ class CreateOCPPage(ctk.CTkFrame):
         footer.grid_propagate(False)
         footer.grid_columnconfigure(0, weight=8)
 
-        save_btn=ctk.CTkButton(footer, text='Create OCP', font=LARGEFONT,height=50,width=215,
+        save_btn=ctk.CTkButton(footer, text='Create OCP', font=LARGEFONT,height=50,width=215,fg_color=forest_green, hover_color=forest_green_d,
                                command= lambda: self.create_ocp())
         save_btn.grid(row=1, column=1, sticky=ctk.E, padx=20, pady=20)
 
