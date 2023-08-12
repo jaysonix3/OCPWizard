@@ -7,7 +7,7 @@ import json
 import base64
 import random
 import shutil
-import webbrowser
+import subprocess
 import customtkinter as ctk
 from bs4 import BeautifulSoup
 from tkinter import filedialog
@@ -933,9 +933,18 @@ class CreateQuizPage(ctk.CTkFrame):
         footer.grid_propagate(False)
         footer.grid_columnconfigure(0, weight=8)
 
+        upload_btn = ctk.CTkButton(footer, text='Download GIFT Format', font=LARGEFONT,height=50,width=215,fg_color=forest_green, hover_color=forest_green_d,
+                               command= lambda: self.downloadGift())
+        upload_btn.grid(row=1, column=0, sticky=ctk.E, padx=20, pady=20)
+        
         webopen_btn=ctk.CTkButton(footer, text='What is GIFT format?', font=LARGEFONT,height=50,width=215,fg_color=forest_green, hover_color=forest_green_d,
-                               command= lambda: [webbrowser.open(os.path.join(os.path.dirname(__file__),'manuals/','GIFT Manual.pdf'))])
+                               command= lambda: subprocess.Popen(["open", os.path.join(os.path.dirname(__file__),'manuals/','GIFT Manual.pdf')]))
         webopen_btn.grid(row=1, column=1, sticky=ctk.E, padx=20, pady=20)
+
+    def downloadGift(self):
+        path = '{}'.format(filedialog.askdirectory(title='Select Folder'))
+        if path:
+            shutil.copy2(os.path.join(os.path.dirname(__file__), 'manuals/', 'GIFT Template.txt'), os.path.join(path, 'GIFT Template.txt'))
 
     def update_btns(self):
         questions = self.controller.get_questions()
