@@ -184,7 +184,7 @@ class OCPWizApp(ctk.CTk):
         self.resources_dir.sort(key=lambda x: (x[1], x[0]))
         
     def delete_resource_dir(self, value):
-        print(self.resources_dir[value])
+        # print(self.resources_dir[value])
         del self.resources_dir[value]
 
     def save_topics_dir(self, topics_dir):
@@ -230,7 +230,10 @@ class OCPWizApp(ctk.CTk):
         self.not_indicate()
         btn.configure(fg_color=up_maroon_l)
         self.change_header(page)
+        # if page == 'ResourcesPage':
+        #     self.refresh_resourcesPage()
         self.show_frame(page)
+        
 
     def change_header(self, page):
         if page == CourseInfoPage:
@@ -816,9 +819,22 @@ class ResourcesPage(ctk.CTkFrame):
                         command=lambda value='File': self.save_dirs(value))
         files_btn.grid(row=3,column=1,sticky=ctk.W,pady=20)
 
+        resources_dir = self.controller.get_resources_dir()    
+        print(resources_dir)    
+        
+        resources_dir_label=ctk.CTkLabel(self.resources_page, text='Resources Directory:',font=LARGEFONT)
+        resources_dir_tb=ctk.CTkTextbox(self.resources_page, font=LARGEFONT, height=150, width=410)
+        for x in resources_dir:
+            resources_dir_tb.insert(ctk.END,x[0]+'\n')
+        resources_dir_tb.configure(state=ctk.DISABLED)
+        
+        resources_dir_label.grid(row=4,column=1,sticky=ctk.W, columnspan=2)
+        resources_dir_tb.grid(row=5,column=1,sticky=ctk.W, columnspan=2)
+     
+
         files_btn = ctk.CTkButton(self.resources_page,text='Remove Resources', font=LARGEFONT,width=410,height=40,fg_color=forest_green, hover_color=forest_green_d,
                         command=lambda: self.check_resources())
-        files_btn.grid(row=4,column=1,sticky=ctk.W,pady=20)
+        files_btn.grid(row=6,column=1,sticky=ctk.W,pady=20)
 
     def save_dirs(self, button_name):
         if button_name == 'Course Guide':
@@ -839,6 +855,7 @@ class ResourcesPage(ctk.CTkFrame):
             else:
                 self.controller.save_resources_dir(source, button_name)
                 msg_box =CTkMessagebox(title='Success', message='Resources Uploaded', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
+                self.update()
 
     def check_resources(self):
         resources_dir = self.controller.get_resources_dir()
@@ -872,7 +889,10 @@ class DelResourcesPage(ctk.CTkFrame):
         delete_btn.grid(row=1,column=1,sticky=ctk.E,padx=20, pady=20)
 
         back_btn=ctk.CTkButton(footer,text="Back",font=LARGEFONT,height=50,width=215,fg_color=forest_green, hover_color=forest_green_d,
-                                    command=lambda: self.controller.indicate(self.controller.resources_btn,ResourcesPage))
+                                    command=lambda: [
+                                    self.controller.refresh_resourcesPage(),
+                                    self.controller.indicate(self.controller.resources_btn,ResourcesPage)
+                                    ])
         back_btn.grid(row=1,column=0,sticky=ctk.E,padx=20, pady=20)
 
     def update_lb(self):
@@ -890,9 +910,12 @@ class DelResourcesPage(ctk.CTkFrame):
             selection = self.lb2.curselection()
             self.lb2.delete(selection)
             self.controller.delete_resource_dir(selection)
-            msg_box =CTkMessagebox(title='Success', message='Resource Deleted', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
+            
+            # msg_box =CTkMessagebox(title='Success', message='Resource Deleted', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
             if self.lb2.size()==0:
+                self.controller.refresh_resourcesPage()
                 self.controller.indicate(self.controller.resources_btn, ResourcesPage)
+            
         except:
             msg_box = CTkMessagebox(title='Error', message='Please select a file/folder to delete.',icon="cancel",button_color=forest_green, button_hover_color=forest_green_d,)
 
