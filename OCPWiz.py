@@ -890,7 +890,7 @@ class DelResourcesPage(ctk.CTkFrame):
         footer.grid_propagate(False)
         footer.grid_columnconfigure(0, weight=8)
 
-        self.lb2 = CTkListbox(del_resources_page,height=10, width=410,font=LARGEFONT)
+        self.lb2 = CTkListbox(del_resources_page,height=10, width=410,font=LARGEFONT, fg_color=('white', 'black'), text_color=('black', 'white'))
         self.lb2.grid(row=2,column=1,sticky=ctk.W, columnspan=2,pady=20)
 
         delete_btn=ctk.CTkButton(footer,text="Delete",font=LARGEFONT,height=50,width=215,fg_color=forest_green, hover_color=forest_green_d,
@@ -907,10 +907,7 @@ class DelResourcesPage(ctk.CTkFrame):
     def update_lb(self):
         resources_dir = self.controller.get_resources_dir()
         if len(resources_dir) != 0 and self.lb2.size() != 0:
-            x = len(resources_dir)
-            while x != 0:
-                self.lb2.delete(x-1)
-                x-=1
+            self.lb2.delete('all')
         for x in range(len(resources_dir)):
             self.lb2.insert(x, resources_dir[x][0])
 
@@ -919,12 +916,12 @@ class DelResourcesPage(ctk.CTkFrame):
             selection = self.lb2.curselection()
             self.lb2.delete(selection)
             self.controller.delete_resource_dir(selection)
-            
+            self.controller.refresh_resourcesPage()
+            self.controller.indicate(self.controller.resources_btn, ResourcesPage)
             # msg_box =CTkMessagebox(title='Success', message='Resource Deleted', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
-            if self.lb2.size()==0:
-                self.controller.refresh_resourcesPage()
-                self.controller.indicate(self.controller.resources_btn, ResourcesPage)
-            
+            # if self.lb2.size()==0:
+            #     self.controller.refresh_resourcesPage()
+            #     self.controller.indicate(self.controller.resources_btn, ResourcesPage)
         except:
             msg_box = CTkMessagebox(title='Error', message='Please select a file/folder to delete.',icon="cancel",button_color=forest_green, button_hover_color=forest_green_d,)
 
@@ -1103,6 +1100,10 @@ class CreateQuizPage(ctk.CTkFrame):
                 self.controller.save_questions(questions)
                 msg_box =CTkMessagebox(title='Success', message='Quiz Uploaded', icon='check',button_color=forest_green, button_hover_color=forest_green_d,)
                 self.update_btns()
+        else: 
+            questions[value] = None
+            self.controller.save_questions(questions)
+            msg_box = CTkMessagebox(title='Error', message='Not a valid file format', icon="cancel",button_color=forest_green, button_hover_color=forest_green_d,)
 
 class CreateOCPPage(ctk.CTkFrame):    
     def __init__(self, parent, controller):
