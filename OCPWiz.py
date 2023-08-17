@@ -15,7 +15,6 @@ from bs4 import BeautifulSoup, Comment
 from CTkMessagebox import CTkMessagebox
 from PIL import Image, ImageDraw, ImageFont
 
-ctk.set_appearance_mode('system')  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme('green')  # Themes: "blue" (standard), "green", "dark-blue"
 LARGEFONT = ('Helvetica', 14)
 
@@ -32,7 +31,7 @@ forest_green_d = '#0a4317'
 class OCPWizApp(ctk.CTk):
     def __init__(self, *args, **kwargs):
         ctk.CTk.__init__(self, *args, **kwargs)
-        ctk.set_appearance_mode('dark')
+        ctk.set_appearance_mode('Light')
         self.geometry('800x600')
         self.title('OCPWiz')
         self.resizable(False,False)
@@ -100,6 +99,10 @@ class OCPWizApp(ctk.CTk):
                                             command=lambda: [self.check_ocp()])
         self.create_ocp_btn.grid(row=5, column=0, columnspan=1)
 
+        self.switch_var = ctk.StringVar(value='off')
+        self.dark_mode = ctk.CTkSwitch(sidebar_frame, text='Dark Mode', command=self.DarkLight, variable=self.switch_var, onvalue='on', offvalue='off', text_color='white')
+        self.dark_mode.grid(row=6, column=0, columnspan=1)
+
         header = ctk.CTkFrame(self,height=105)
         header.pack(side='top',fill='x')
         header.grid_propagate(False)
@@ -135,6 +138,12 @@ class OCPWizApp(ctk.CTk):
 
         self.indicate(self.course_info_btn, CourseInfoPage)
 
+    def DarkLight(self):
+        print("switch toggled, current value:", self.switch_var.get())
+        if self.switch_var.get() == 'off':
+            ctk.set_appearance_mode('Light')  # Modes: "System" (standard), "Dark", "Light"
+        else:
+            ctk.set_appearance_mode('Dark')
     #SAVE DETAILS ------------------------------
     def save_course_info(self, faculty, course_no, course_title, num_topics, course_intro):
         if self.num_topics == -1 or self.num_topics == num_topics:
@@ -631,7 +640,7 @@ class CourseInfoPage(ctk.CTkFrame):
                 "Faculty of Management and Development Studies",
                 ],
             font=LARGEFONT,width=410,height=40,
-            variable=self.cb_var)
+            variable=self.cb_var, border_color='black')
         
         self.cb_var.trace_add(  # add a trace to watch cb_var
             'write',  # callback will be triggered whenever cb_var is written
@@ -645,7 +654,7 @@ class CourseInfoPage(ctk.CTkFrame):
         course_no_label=ctk.CTkLabel(course_info_page, text='Course No:',font=LARGEFONT)
         course_no_label.grid(row=4,column=1,sticky=ctk.W, columnspan=2)
         
-        self.course_no_entry=ctk.CTkEntry(course_info_page,font=LARGEFONT,width=410,height=40,)
+        self.course_no_entry=ctk.CTkEntry(course_info_page,font=LARGEFONT,width=410,height=40, border_color='black')
         self.course_no_entry.grid(row=5,column=1,sticky=ctk.W, columnspan=2)
 
         self.course_no_err=ctk.CTkLabel(course_info_page,text='',font=('Helvetica',9), text_color='red')
@@ -656,7 +665,7 @@ class CourseInfoPage(ctk.CTkFrame):
         course_title_label=ctk.CTkLabel(course_info_page, text='Course Title:',font=LARGEFONT)
         course_title_label.grid(row=7,column=1,sticky=ctk.W)
         
-        self.course_title_entry=ctk.CTkEntry(course_info_page,font=LARGEFONT,width=410,height=40,)
+        self.course_title_entry=ctk.CTkEntry(course_info_page,font=LARGEFONT,width=410,height=40, border_color='black')
         self.course_title_entry.grid(row=8,column=1,sticky=ctk.W, columnspan=2)
 
         self.course_title_err=ctk.CTkLabel(course_info_page,text='',font=('Helvetica',9), text_color='red')
@@ -669,7 +678,7 @@ class CourseInfoPage(ctk.CTkFrame):
         num_topics_label=ctk.CTkLabel(course_info_page, text='Number of Topics:',font=LARGEFONT)
         num_topics_label.grid(row=10,column=1,sticky=ctk.W)
         
-        self.num_topics_entry=ctk.CTkEntry(course_info_page,font=LARGEFONT,width=410,height=40,
+        self.num_topics_entry=ctk.CTkEntry(course_info_page,font=LARGEFONT,width=410,height=40, border_color='black',
                                            validate='all',validatecommand=(vcmd, '%P'))
         self.num_topics_entry.grid(row=11,column=1,sticky=ctk.W, columnspan=2)
 
