@@ -2,22 +2,24 @@
 
 
 block_cipher = None
-added_files = [
-    ('files', 'files'),
-    ('manuals', 'manuals'),
-    ('template', 'template')
-]
+
 
 a = Analysis(
     ['OCPWiz.py'],
     pathex=[],
     binaries=[],
-    datas=added_files,
+    datas=[
+        ('files', 'files'),
+        ('manuals', 'manuals'),
+        ('template', 'template'),
+        ('CTkMessagebox', 'CTkMessagebox')
+        ],
     hiddenimports=[
-        'beautifulsoup4',
         'bs4',
+        'CTkListbox',
+        'CTkMessagebox',
         'customtkinter',
-        'Pillow'
+        'PIL'
     ],
     hookspath=[],
     hooksconfig={},
