@@ -14,6 +14,7 @@ from CTkListbox import CTkListbox
 from bs4 import BeautifulSoup, Comment
 from CTkMessagebox import CTkMessagebox
 from PIL import Image, ImageDraw, ImageFont
+import webbrowser
 
 ctk.set_default_color_theme('green')  # Themes: "blue" (standard), "green", "dark-blue"
 LARGEFONT = ('Helvetica', 14)
@@ -983,7 +984,10 @@ class CreateQuizPage(ctk.CTkFrame):
         upload_btn.grid(row=1, column=0, sticky=ctk.E, padx=20, pady=20)
         
         webopen_btn=ctk.CTkButton(footer, text='What is GIFT format?', font=LARGEFONT,height=50,width=215,fg_color=forest_green, hover_color=forest_green_d,
-                               command= lambda: subprocess.Popen([os.path.join(os.path.dirname(__file__),'manuals/','GIFT Manual.pdf')], shell=True))
+                               command= lambda: [
+                                subprocess.Popen(["open", os.path.join(os.path.dirname(__file__),'manuals/','GIFTManual.pdf')])
+                                # webbrowser.open_new(os.path.join(os.path.dirname(__file__),'manuals/','GIFTManual.pdf'))
+                                ])
         webopen_btn.grid(row=1, column=1, sticky=ctk.E, padx=20, pady=20)
 
     def downloadGift(self):
